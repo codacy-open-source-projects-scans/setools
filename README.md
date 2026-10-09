@@ -11,24 +11,32 @@ analysis.  Please consult the KNOWN-BUGS file prior to reporting bugs.
 SETools uses the Python setuptools build system to build, and install.
 As such it contains a setup.py script that will install the tools.
 
-To run SETools command line tools, the following packages are required:
+To run SETools basic command line tools, the following packages are required:
 
 * Python 3.10+
-* NetworkX 2.6+
-* pygraphviz
 * setuptools
 * libselinux
-* libsepol 3.2+
+* libsepol 3.9+
+
+To run SETools graph-based analysis, domain transition and information flow,
+the following packages are also required:
+
+* NetworkX 2.6+
+* pygraphviz (optional, for graphical output)
 
 To run SETools graphical tools, the following packages are also required:
 
 * PyQt6
 
+To run SETools AI tools, the following packages are also required:
+
+* FastMCP 2.0+
+
 To build SETools, the following development packages are required, in
 addition to the development packages from the above list:
 
 * gcc
-* cython 0.29.14
+* cython 0.29.14 (only if regenerating setools/policyrep.c)
 
 To run SETools unit tests, the following packages are required, in
 addition to the above dependencies:
@@ -63,6 +71,27 @@ series is considered stable, and has its own branch, e.g. "4.0" for all
 
 Where `4.0` is the release series.  Each release will have a tag.
 
+### Installing SETools
+
+The SETools source distribution is a Python sdist and can be installed using
+pip.
+
+```bash
+  $ sudo pip install setools-4.7.0.tar.bz2
+```
+
+### Regenerating C Extension
+
+The SETools policy representation library is implemented as a Python C
+extension using Cython. The source distribution includes pre-generated C source
+for this extension.  To regenerate it and install the package, unpack the
+source distribution, install Cython, and run the following commands:
+
+```bash
+  $ python setup.py clean --all
+  $ sudo pip install .
+```
+
 ### Building SETools for Local Use
 
 To use SETools locally, without installing it onto the system,
@@ -76,20 +105,6 @@ and perform the following at the root:
 This will compile the C portion of SETools locally, and then
 the tools can be ran from the current directory (e.g. `./seinfo`).
 
-### Installing SETools
-
-Unpack the official distribution or check out the git repository,
-and perform the following at the root:
-
-```bash
-  $ python setup.py build_ext
-  $ python setup.py build
-  $ python setup.py install
-```
-
-This will put the applications in /usr/bin, data files in `/usr/share/setools`,
-and libraries in `/usr/lib/pythonX.Y/site-packages/setools`.
-
 ### Building SETools with a Local Libsepol and Libselinux
 
 At times, SETools requires a newer libsepol than is available from
@@ -101,9 +116,7 @@ be compiled.
 
 ```bash
   $ export USERSPACE_SRC=/home/user/src/selinux
-  $ python setup.py build_ext
-  $ python setup.py build
-  $ python setup.py install
+  $ pip install --user setools-4.7.0.tar.bz2
 ```
 
 This feature assumes that the directory structure at `$USERSPACE_SRC` is the
@@ -115,8 +128,8 @@ using `LD_LIBRARY_PATH` so that the newer versions of the libraries are used.
 
 ```bash
   $ export LD_LIBRARY_PATH="/home/user/src/selinux/libsepol/src:/home/user/src/selinux/libselinux/src"
-  $ ./seinfo policy.31
-  $ ./sesearch -A sysadm_t policy.31
+  $ seinfo policy.31
+  $ sesearch -A sysadm_t policy.31
 ```
 
 ### Installation Options
@@ -157,6 +170,12 @@ sedta      | Perform domain transition analyses.
 seinfo     | List policy components.
 seinfoflow | Perform information flow analyses.
 sesearch   | Search rules (allow, type_transition, etc.)
+
+### AI tools
+
+Tool Name   | Use
+----------- | -------------------------------------------
+setools-mcp | A model context protocol server providing analysis tools to LLMs.
 
 ### Analysis Libraries
 
